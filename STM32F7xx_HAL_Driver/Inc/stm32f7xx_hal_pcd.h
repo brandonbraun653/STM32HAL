@@ -288,26 +288,26 @@ PCD_StateTypeDef HAL_PCD_GetState(PCD_HandleTypeDef *hpcd);
 /** @defgroup USB_EXTI_Line_Interrupt USB EXTI line interrupt
   * @{
   */
-#if defined (USB_OTG_FS) || defined (USB_OTG_HS)
-#define USB_OTG_FS_WAKEUP_EXTI_RISING_EDGE                            0x08U
-#define USB_OTG_FS_WAKEUP_EXTI_FALLING_EDGE                           0x0CU
-#define USB_OTG_FS_WAKEUP_EXTI_RISING_FALLING_EDGE                    0x10U
+// #if defined (USB_OTG_FS) || defined (USB_OTG_HS)
+// #define USB_OTG_FS_WAKEUP_EXTI_RISING_EDGE                            0x08U
+// #define USB_OTG_FS_WAKEUP_EXTI_FALLING_EDGE                           0x0CU
+// #define USB_OTG_FS_WAKEUP_EXTI_RISING_FALLING_EDGE                    0x10U
 
-#define USB_OTG_HS_WAKEUP_EXTI_RISING_EDGE                            0x08U
-#define USB_OTG_HS_WAKEUP_EXTI_FALLING_EDGE                           0x0CU
-#define USB_OTG_HS_WAKEUP_EXTI_RISING_FALLING_EDGE                    0x10U
+// #define USB_OTG_HS_WAKEUP_EXTI_RISING_EDGE                            0x08U
+// #define USB_OTG_HS_WAKEUP_EXTI_FALLING_EDGE                           0x0CU
+// #define USB_OTG_HS_WAKEUP_EXTI_RISING_FALLING_EDGE                    0x10U
 
-#ifndef LL_EXTI_LINE_18
-#define LL_EXTI_LINE_18                                               0x00040000U
-#endif
+// #ifndef LL_EXTI_LINE_18
+// #define LL_EXTI_LINE_18                                               0x00040000U
+// #endif
 
-#ifndef LL_EXTI_LINE_20
-#define LL_EXTI_LINE_20                                               0x00100000U
-#endif
+// #ifndef LL_EXTI_LINE_20
+// #define LL_EXTI_LINE_20                                               0x00100000U
+// #endif
 
-#define USB_OTG_FS_WAKEUP_EXTI_LINE                                   LL_EXTI_LINE_18  /*!< External interrupt line 17 Connected to the USB EXTI Line */
-#define USB_OTG_HS_WAKEUP_EXTI_LINE                                   LL_EXTI_LINE_20  /*!< External interrupt line 20 Connected to the USB HS EXTI Line */
-#endif /* USB_OTG_FS || USB_OTG_HS */
+// #define USB_OTG_FS_WAKEUP_EXTI_LINE                                   LL_EXTI_LINE_18  /*!< External interrupt line 17 Connected to the USB EXTI Line */
+// #define USB_OTG_HS_WAKEUP_EXTI_LINE                                   LL_EXTI_LINE_20  /*!< External interrupt line 20 Connected to the USB HS EXTI Line */
+// #endif /* USB_OTG_FS || USB_OTG_HS */
 
 
 /**

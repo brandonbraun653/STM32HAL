@@ -1,176 +1,168 @@
-# ------------------------------------------
-# Local Rules 
-# ------------------------------------------
-
-# 1. Check if variable exists from Jamroot
-# 2. Validate the chip from a list of supported devices
-# 3. Pass the chip into the project defines 
-# 4. Pass chip specific sources and includes into targets
-# 5: Create chip specific compiler/linker flags
-
-rule is_chip_valid ( stm32f7_chip )
-{
-    ECHO "Chip validity function isn't implemented yet!" ;
-    return FALSE ;
-}
-
-rule find_startup_file ( startup_dir : stm32f7_chip )
-{
-    # Use the check if valid chip rule here
-    local chip_validity = [ is_chip_valid $(stm32f7_chip) ] ;
-
-    if $(chip_validity) = TRUE
+rule explicit_alias ( name : sources * : requirements * : default-build * : usage-requirements * )
     {
-        ECHO $(stm32f7_chip) ;
-        if $(stm32f7_chip) = STM32F767xx
-        {
-            return $(startup_dir)/startup_stm32f767xx.c ;
-        }
-
-        ECHO "STM32F7 chip reported valid but not handled in 'find_startup_file'" ;
-        return you_hit_an_error_in__rule_find_startup_file.c ;
-    } 
-    else
-    {
-        ECHO "STM32F7 Family Chip Invalid!" ;
-        return you_hit_an_error_in__rule_find_startup_file.c ;
+    alias $(name) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
+    explicit $(name) ;
     }
-
-}
-
-
 
 # ------------------------------------------
 # Build Target Specific Options 
 # ------------------------------------------
-f7_dbg_defs = DEBUG ;
-f7_dbg_cflags = -ggdb -Og ;
+local f7_dbg_defs = DEBUG ;
+local f7_dbg_cflags = -ggdb -Og ;
 
-f7_rel_defs = NDEBUG ;
-f7_rel_cflags = -O3 ;
+local f7_rel_defs = NDEBUG ;
+local f7_rel_cflags = -O3 ;
+
 
 # ------------------------------------------
-# CFlag Options
-#   Specific: Device specific flags within the STM32F7 family
-#   Local: Local target only flags that will not be propogated to dependents
-#   Propagated: Will be propagated to dependents
+# Generic STM32F7 Family CFlags
 # ------------------------------------------
-specific_cflags = 
-     -mfpu=fpv5-sp-d16
-     ;
-
-local_cflags = 
+# Applies to all F7 targets, but not propagated to dependents.
+local generic_f7_requirements_cflags = 
     -fno-common
     -fmessage-length=0
     -fno-exceptions
     -ffunction-sections
     -fdata-sections
     -Wall
-    -mthumb
     --std=gnu11 
     ;
 
-# Assumes all devices are Cortex-M7 processors with HW FPU
-propagated_cflags = 
+# Assumes all devices are Cortex-M7 processors with HW FPU.
+# Will be propagated to dependents
+local generic_f7_usage_requirements_cflags = 
     -mfloat-abi=hard
     -mcpu=cortex-m7
-    $(specific_cflags)
+    -mthumb
     ;
 
-all_cflags =
-    $(local_cflags)
-    $(propagated_cflags)
+# Likely also compiled by a C++ compiler, but the flags are the same
+local generic_f7_usage_requirements_cxxflags = 
+    $(generic_f7_usage_requirements_cflags)
+    ;
+
+local all_generic_f7_cflags =
+    $(generic_f7_requirements_cflags)
+    $(generic_f7_usage_requirements_cflags)
     ;
 
 # ------------------------------------------
-# Link Flag Options
-#   Specific: Device specific flags within the STM32F7 family
-#   Local: Local target only flags that will not be propogated to dependents
-#   Propagated: Will be propagated to dependents
+# Generic STM32F7 Family Linker Flags
 # ------------------------------------------
-specific_link_flags = 
-    -mfpu=fpv5-sp-d16 
+# Applies to all F7 targets, but not propagated to dependents.
+local generic_f7_requirements_link_flags = 
+    -mthumb 
     -mabi=aapcs 
     ;
 
-local_link_flags = 
-    -mthumb 
-    ;
-
-# Assumes all devices are Cortex-M7 processors with hw FPU
-propagated_link_flags = 
+# Assumes all devices are Cortex-M7 processors with HW FPU.
+# Will be propagated to dependents.
+local generic_f7_usage_requirements_link_flags = 
     -mfloat-abi=hard 
     -mcpu=cortex-m7
-    $(specific_link_flags)
     ;
 
-all_link_flags = 
-    $(local_link_flags)
-    $(propagated_link_flags)
+local all_generic_f7_link_flags = 
+    $(generic_f7_requirements_link_flags)
+    $(generic_f7_usage_requirements_link_flags)
     ;
 
 # ------------------------------------------
 # Source/Include Directories 
 # ------------------------------------------
-f7_hal_driver_src_dir = STM32F7xx_HAL_Driver/Src ;
-f7_dev_system_src_dir = Device/sys ;
-f7_dev_startup_src_dir = Device/startup ;
+local f7_hal_driver_src_dir = STM32F7xx_HAL_Driver/Src ;
+local f7_dev_system_src_dir = Device/sys ;
+local f7_dev_startup_src_dir = Device/startup ;
 
+local f7_hal_inc_dir = STM32F7xx_HAL_Driver/Inc ;
+local f7_dev_inc_dir = Device/include ;
+local f7_cfg_inc_dir = Device/conf ;
+local cmsis_inc_dir = ../cmsis/CMSIS/Core/Include ;
 
-f7_inc = STM32F7xx_HAL_Driver/Inc ;
-f7_dev = Device/include ;
-f7_cfg = Device/conf ;
-cmsis_inc = ../cmsis/CMSIS/Core/Include ;
+local f7_include_dirs = 
+    $(f7_hal_inc_dir)
+    $(f7_dev_inc_dir)
+    $(f7_cfg_inc_dir)
+    $(cmsis_inc_dir)
+    ;
 
 # ------------------------------------------
 # Source Files
 # ------------------------------------------
-f7_startup_src = [ find_startup_file $(f7_dev_startup_src_dir) : STM32F768xx ] ;
-f7_system_src = $(f7_dev_system_src_dir)/system_stm32f7xx.c ;
+local f7_common_src = $(f7_dev_system_src_dir)/system_stm32f7xx.c ;
+local f7_ll_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_ll_*.c ] ;
+local f7_hal_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_hal_*.c ] ;
 
-f7_common_src = $(f7_startup_src) $(f7_system_src) ;
-f7_ll_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_ll_*.c ] ;
-f7_hal_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_hal_*.c ] ;
+# ------------------------------------------
+# Device Specific Libs: 
+#   Figures out what device we are actually compiling for. By default
+#   propagates MCU specific defines/cflags/linkflags in the usage-requirements 
+#   field. This is how so many chip variants are supported without much effort.
+# ------------------------------------------
+# If this is hit, you need to define <ThorMCU> for one of the project requirements.
+lib F7_TARGET_MCU : ThorMCU_feature_not_defined.c : <ThorMCU>STM32F7xx : <link>static ;
+
+lib F7_TARGET_MCU
+    :   $(f7_dev_startup_src_dir)/startup_stm32f767xx.c
+
+    :   <ThorMCU>STM32F767
+        <define>DEBUG_DEFAULT_INTERRUPT_HANDLERS
+        <include>$(f7_include_dirs)
+        <cflags>$(all_generic_f7_cflags)
+        <cflags>-mfpu=fpv5-sp-d16
+        <linkflags>$(all_generic_f7_link_flags)
+        <linkflags>-mfpu=fpv5-sp-d16 
+
+    :   <link>static
+
+    # Expect all these to be propagated to all projects
+    :   <define>STM32F767xx
+        <linkflags>-mfpu=fpv5-sp-d16
+        <linkflags>$(generic_f7_usage_requirements_link_flags)
+        <cflags>$(generic_f7_usage_requirements_cflags)
+        <cflags>-mfpu=fpv5-sp-d16 
+        <cxxflags>$(generic_f7_usage_requirements_cflags)
+        <cxxflags>-mfpu=fpv5-sp-d16
+    ;
+
+explicit F7_TARGET_MCU ;
 
 # ------------------------------------------
 # Common Project Properties
 # ------------------------------------------
-project
-    : usage-requirements
-        <include>$(f7_inc)
-        <cflags>$(propagated_cflags)
-        <linkflags>$(propagated_link_flags)
-
-    : requirements
-        <define>USE_FULL_LL_DRIVER
-        <source>$(f7_common_src)
-        <include>$(f7_inc)
-        <include>$(f7_dev)
-        <include>$(f7_cfg)
-        <include>$(cmsis_inc)
-        <cflags>$(all_cflags)
-        <linkflags>$(all_link_flags)
-    ;
+project STM32F7_HAL_DRIVER : usage-requirements <include>$(f7_include_dirs) ;
 
 # ------------------------------------------
 # STM32HAL Low Level Driver Lib Targets
 # ------------------------------------------
-lib LL_DRIVER : : : <link>static : ;
+lib LL_DRIVER : : : <link>static ;
 
 lib LL_DRIVER 
-    :   $(f7_ll_src) 
+    :   $(f7_ll_src)
+        $(f7_common_src)
+        F7_TARGET_MCU
     :   <variant>debug
+        <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
+        <cflags>$(all_generic_f7_cflags)
     :   <link>static
+    :   <define>USE_FULL_LL_DRIVER
+        <use>F7_TARGET_MCU
     ;
 
 lib LL_DRIVER 
     :   $(f7_ll_src) 
+        $(f7_common_src)
+        F7_TARGET_MCU
     :   <variant>release
+        <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
+        <cflags>$(all_generic_f7_cflags)
     :   <link>static
+    :   <define>USE_FULL_LL_DRIVER
+        <use>F7_TARGET_MCU
     ;
 
 explicit LL_DRIVER ;
@@ -178,22 +170,59 @@ explicit LL_DRIVER ;
 # ------------------------------------------
 # STM32HAL Driver Lib Targets
 # ------------------------------------------
-lib HAL_DRIVER : : : <link>static : ;
+lib HAL_DRIVER : : : <link>static ;
 
 lib HAL_DRIVER 
-    :   $(f7_hal_src)
+    :   $(f7_hal_src)  
+        $(f7_common_src)
+        F7_TARGET_MCU
     :   <variant>debug
+        <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
+        <cflags>$(all_generic_f7_cflags)
     :   <link>static
+    :   <use>F7_TARGET_MCU
     ;
 
 lib HAL_DRIVER
-    :   $(f7_hal_src)
+    :   $(f7_hal_src) 
+        $(f7_common_src)
+        F7_TARGET_MCU
     :   <variant>release
+        <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
+        <cflags>$(all_generic_f7_cflags)
     :   <link>static
+    :   <use>F7_TARGET_MCU
     ;
 
 explicit HAL_DRIVER ;
+
+# ------------------------------------------
+# STM32F7xx Library Components:
+#   These are intented to be consumed by the user
+# ------------------------------------------
+explicit_alias PUB : : : : <include>$(f7_include_dirs) ;
+
+lib F7_HAL : HAL_DRIVER : : <ThorMCU>STM32F7xx 
+    :   <use>PUB
+        <use>F7_TARGET_MCU
+    ;
+explicit F7_HAL ;
+
+lib F7_LL : LL_DRIVER : : <ThorMCU>STM32F7xx
+    :   <use>PUB   
+        <use>F7_TARGET_MCU
+    ;
+explicit F7_LL ;
+
+lib F7_LIB : F7_HAL F7_LL : : <ThorMCU>STM32F7xx 
+    :   <use>PUB
+        <use>F7_TARGET_MCU 
+    ;
+explicit F7_LIB ;
+
+
+

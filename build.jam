@@ -13,6 +13,7 @@ local f7_dbg_cflags = -ggdb -Og ;
 local f7_rel_defs = NDEBUG ;
 local f7_rel_cflags = -O3 ;
 
+local linker_script = D:/git/GitHub/AeroFC/sw/lib/Processor/Thor/Thor/lib/stm32hal_f7/Device/ld ;
 
 # ------------------------------------------
 # Generic STM32F7 Family CFlags
@@ -100,12 +101,13 @@ local f7_hal_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_hal_*.c ] ;
 #   field. This is how so many chip variants are supported without much effort.
 # ------------------------------------------
 # If this is hit, you need to define <ThorMCU> for one of the project requirements.
-lib F7_TARGET_MCU : ThorMCU_feature_not_defined.c : <ThorMCU>STM32F7xx : <link>static ;
+lib F7_TARGET_MCU : ThorMCU_feature_not_defined.c : <ThorMCU>STM32F7xx ;
 
 lib F7_TARGET_MCU
     :   $(f7_dev_startup_src_dir)/startup_stm32f767xx.c
 
     :   <ThorMCU>STM32F767
+        <link>static
         <define>DEBUG_DEFAULT_INTERRUPT_HANDLERS
         <include>$(f7_include_dirs)
         <cflags>$(all_generic_f7_cflags)
@@ -113,12 +115,14 @@ lib F7_TARGET_MCU
         <linkflags>$(all_generic_f7_link_flags)
         <linkflags>-mfpu=fpv5-sp-d16 
 
-    :   <link>static
+    :
 
     # Expect these to be propagated to all projects
     :   <define>STM32F767xx
+        <source>$(f7_dev_startup_src_dir)/startup_stm32f767xx.c
         <linkflags>-mfpu=fpv5-sp-d16
         <linkflags>$(generic_f7_usage_requirements_link_flags)
+        <linkflags>-T$(linker_script)/STM32F767ZI_flash.lds
         <cflags>$(generic_f7_usage_requirements_cflags)
         <cflags>-mfpu=fpv5-sp-d16 
         <cxxflags>$(generic_f7_usage_requirements_cflags)
@@ -135,20 +139,22 @@ project STM32F7_HAL_DRIVER : usage-requirements <include>$(f7_include_dirs) ;
 # ------------------------------------------
 # STM32HAL Low Level Driver Lib Targets
 # ------------------------------------------
-lib LL_DRIVER : invld_stm32f7_ll_cfg.c : : <link>static ;
+lib LL_DRIVER : invld_stm32f7_ll_cfg.c ;
 
 lib LL_DRIVER 
     :   $(f7_ll_src)
         $(f7_common_src)
         F7_TARGET_MCU
 
-    :   <variant>debug
+    :   <ThorFamily>STM32F7
+        <variant>debug
+        <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
         <cflags>$(all_generic_f7_cflags)
 
-    :   <link>static
+    :   
 
     :   <define>USE_FULL_LL_DRIVER
         <use>F7_TARGET_MCU
@@ -159,13 +165,15 @@ lib LL_DRIVER
         $(f7_common_src)
         F7_TARGET_MCU
 
-    :   <variant>release
+    :   <ThorFamily>STM32F7
+        <variant>release
+        <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
         <cflags>$(all_generic_f7_cflags)
 
-    :   <link>static
+    :   
 
     :   <define>USE_FULL_LL_DRIVER
         <use>F7_TARGET_MCU
@@ -176,20 +184,22 @@ explicit LL_DRIVER ;
 # ------------------------------------------
 # STM32HAL Driver Lib Targets
 # ------------------------------------------
-lib HAL_DRIVER : invld_stm32f7_hal_cfg.c : : <link>static ;
+lib HAL_DRIVER : invld_stm32f7_hal_cfg.c ;
 
-lib HAL_DRIVER 
+lib HAL_DRIVER
     :   $(f7_hal_src)  
         $(f7_common_src)
         F7_TARGET_MCU
 
-    :   <variant>debug
+    :   <ThorFamily>STM32F7
+        <variant>debug
+        <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
         <cflags>$(all_generic_f7_cflags)
 
-    :   <link>static
+    :   #<link>static
 
     :   <use>F7_TARGET_MCU
     ;
@@ -199,13 +209,15 @@ lib HAL_DRIVER
         $(f7_common_src)
         F7_TARGET_MCU
 
-    :   <variant>release
+    :   <ThorFamily>STM32F7
+        <variant>release
+        <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
         <cflags>$(all_generic_f7_cflags)
 
-    :   <link>static
+    :
 
     :   <use>F7_TARGET_MCU
     ;

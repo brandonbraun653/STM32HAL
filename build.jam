@@ -115,7 +115,7 @@ lib F7_TARGET_MCU
 
     :   <link>static
 
-    # Expect all these to be propagated to all projects
+    # Expect these to be propagated to all projects
     :   <define>STM32F767xx
         <linkflags>-mfpu=fpv5-sp-d16
         <linkflags>$(generic_f7_usage_requirements_link_flags)
@@ -135,18 +135,21 @@ project STM32F7_HAL_DRIVER : usage-requirements <include>$(f7_include_dirs) ;
 # ------------------------------------------
 # STM32HAL Low Level Driver Lib Targets
 # ------------------------------------------
-lib LL_DRIVER : : : <link>static ;
+lib LL_DRIVER : invld_stm32f7_ll_cfg.c : : <link>static ;
 
 lib LL_DRIVER 
     :   $(f7_ll_src)
         $(f7_common_src)
         F7_TARGET_MCU
+
     :   <variant>debug
         <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
         <cflags>$(all_generic_f7_cflags)
+
     :   <link>static
+
     :   <define>USE_FULL_LL_DRIVER
         <use>F7_TARGET_MCU
     ;
@@ -155,12 +158,15 @@ lib LL_DRIVER
     :   $(f7_ll_src) 
         $(f7_common_src)
         F7_TARGET_MCU
+
     :   <variant>release
         <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
         <cflags>$(all_generic_f7_cflags)
+
     :   <link>static
+
     :   <define>USE_FULL_LL_DRIVER
         <use>F7_TARGET_MCU
     ;
@@ -170,18 +176,21 @@ explicit LL_DRIVER ;
 # ------------------------------------------
 # STM32HAL Driver Lib Targets
 # ------------------------------------------
-lib HAL_DRIVER : : : <link>static ;
+lib HAL_DRIVER : invld_stm32f7_hal_cfg.c : : <link>static ;
 
 lib HAL_DRIVER 
     :   $(f7_hal_src)  
         $(f7_common_src)
         F7_TARGET_MCU
+
     :   <variant>debug
         <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
         <cflags>$(f7_dbg_cflags)
         <cflags>$(all_generic_f7_cflags)
+
     :   <link>static
+
     :   <use>F7_TARGET_MCU
     ;
 
@@ -189,12 +198,15 @@ lib HAL_DRIVER
     :   $(f7_hal_src) 
         $(f7_common_src)
         F7_TARGET_MCU
+
     :   <variant>release
         <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
         <cflags>$(f7_rel_cflags)
         <cflags>$(all_generic_f7_cflags)
+
     :   <link>static
+
     :   <use>F7_TARGET_MCU
     ;
 
@@ -204,25 +216,16 @@ explicit HAL_DRIVER ;
 # STM32F7xx Library Components:
 #   These are intented to be consumed by the user
 # ------------------------------------------
+# When used, propagates the includes to the target
 explicit_alias PUB : : : : <include>$(f7_include_dirs) ;
 
-lib F7_HAL : HAL_DRIVER : : <ThorMCU>STM32F7xx 
-    :   <use>PUB
-        <use>F7_TARGET_MCU
-    ;
-explicit F7_HAL ;
+# Note: When using an alias and it has sources, the usage requirements
+#       are propagated up too. So...this alias should provide the lib
+#       AND the headers used to interact with it. Ok.
+explicit_alias F7_HAL : HAL_DRIVER : : <ThorMCU>STM32F7xx : <use>PUB ;
 
-lib F7_LL : LL_DRIVER : : <ThorMCU>STM32F7xx
-    :   <use>PUB   
-        <use>F7_TARGET_MCU
-    ;
-explicit F7_LL ;
+explicit_alias F7_LL : LL_DRIVER : : <ThorMCU>STM32F7xx : <use>PUB ;
 
-lib F7_LIB : F7_HAL F7_LL : : <ThorMCU>STM32F7xx 
-    :   <use>PUB
-        <use>F7_TARGET_MCU 
-    ;
-explicit F7_LIB ;
-
+explicit_alias F7_LIB : F7_HAL F7_LL : : <ThorMCU>STM32F7xx : <use>PUB ;
 
 

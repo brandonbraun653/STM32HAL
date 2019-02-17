@@ -13,7 +13,7 @@ local f7_dbg_cflags = -ggdb -Og ;
 local f7_rel_defs = NDEBUG ;
 local f7_rel_cflags = -O3 ;
 
-local linker_dir = Device/ld ;
+local linker_dir = $(STM32F7_ROOT)/Device/ld ;
 
 # ------------------------------------------
 # Generic STM32F7 Family CFlags

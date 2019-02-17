@@ -61,6 +61,8 @@ local generic_f7_requirements_link_flags =
 local generic_f7_usage_requirements_link_flags = 
     -mfloat-abi=hard 
     -mcpu=cortex-m7
+    -specs=nano.specs 
+    -specs=nosys.specs
     ;
 
 local all_generic_f7_link_flags = 
@@ -91,8 +93,8 @@ local f7_include_dirs =
 # Source Files
 # ------------------------------------------
 local f7_common_src = $(f7_dev_system_src_dir)/system_stm32f7xx.c ;
-local f7_ll_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_ll_*.c ] ;
-local f7_hal_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_hal_*.c ] ;
+local f7_ll_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_ll*.c ] ;
+local f7_hal_src = [ glob $(f7_hal_driver_src_dir)/stm32f7xx_hal*.c ] ;
 
 # ------------------------------------------
 # Device Specific Libs: 
@@ -149,6 +151,7 @@ lib LL_DRIVER
         <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_dbg_defs)
+        <define>USE_FULL_LL_DRIVER
         <cflags>$(f7_dbg_cflags)
         <cflags>$(all_generic_f7_cflags)
         <use>F7_TARGET_MCU
@@ -167,6 +170,7 @@ lib LL_DRIVER
         <link>static
         <include>$(f7_include_dirs)
         <define>$(f7_rel_defs)
+        <define>USE_FULL_LL_DRIVER
         <cflags>$(f7_rel_cflags)
         <cflags>$(all_generic_f7_cflags)
         <use>F7_TARGET_MCU

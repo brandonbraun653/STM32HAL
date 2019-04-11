@@ -232,10 +232,10 @@ explicit_alias PUB : : : : <include>$(f7_include_dirs) ;
 # Note: When using an alias and it has sources, the usage requirements
 #       are propagated up too. So...this alias should provide the lib
 #       AND the headers used to interact with it. Ok.
-explicit_alias F7_HAL : HAL_DRIVER : : <ThorChip>STM32F7xx : <use>PUB ;
+explicit_alias F7_HAL : HAL_DRIVER : : : <use>PUB ;
 
-explicit_alias F7_LL : LL_DRIVER : : <ThorChip>STM32F7xx : <use>PUB ;
+explicit_alias F7_LL : LL_DRIVER : : : <use>PUB ;
 
-explicit_alias F7_LIB : F7_HAL F7_LL : : <ThorChip>STM32F7xx : <use>PUB ;
+explicit_alias F7_LIB : F7_HAL F7_LL : : : <use>PUB ;
 
 

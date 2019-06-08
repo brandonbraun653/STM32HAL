@@ -155,10 +155,10 @@ typedef enum
   * @brief GPIO Output Maximum frequency
   * @{
   */  
-#define  GPIO_SPEED_LOW         ((uint32_t)0x00000000U)  /*!< Low speed     */
-#define  GPIO_SPEED_MEDIUM      ((uint32_t)0x00000001U)  /*!< Medium speed  */
-#define  GPIO_SPEED_HIGH        ((uint32_t)0x00000002U)  /*!< Fast speed    */
-#define  GPIO_SPEED_VERY_HIGH   ((uint32_t)0x00000003U)  /*!< High speed    */
+#define  GPIO_SPEED_FREQ_LOW         ((uint32_t)0x00000000U)  /*!< Low speed     */
+#define  GPIO_SPEED_FREQ_MEDIUM      ((uint32_t)0x00000001U)  /*!< Medium speed  */
+#define  GPIO_SPEED_FREQ_HIGH        ((uint32_t)0x00000002U)  /*!< Fast speed    */
+#define  GPIO_SPEED_FREQ_VERY_HIGH   ((uint32_t)0x00000003U)  /*!< High speed    */
 /**
   * @}
   */
